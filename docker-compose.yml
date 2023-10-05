@@ -1,0 +1,20 @@
+version: '3.8'
+
+name: ngm
+
+# For connection urls to the following instances, see
+# https://github.com/prisma/prisma/blob/main/TESTING.md#environment-variables
+services:
+  # https://github.com/prisma/prisma/tree/main/docker
+  # Replica Set (required for Prisma Client)
+  mongo:
+    build: .
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      MONGO_REPLICA_HOST: localhost
+      MONGO_REPLICA_PORT: 27017
+    ports:
+      - 27017:27017
+    volumes:
+      - ./server/db:/data/db
