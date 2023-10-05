@@ -9,6 +9,8 @@ const typeDefs = `#graphql
     firstName: String!
     lastName: String!
     fullName: String!
+    createdAt: String
+    updatedAt: String
   }
   type Post {
     id: ID!
@@ -37,20 +39,18 @@ const resolvers = {
   Query: {
     countAuthors: () => author.count(),
     allAuthors: () => author.find(),
-    findAuthor: (_: undefined, args: typeof authors[0]) => authors.find((a) => a.firstName === args.firstName),
+    findAuthor: (_: undefined, args: typeof authors[0]) => author.findOne({ firstName: args.firstName }),
   },
   Mutation: {
-    createAuthor(_: undefined, { input }: { input: Omit<typeof authors[0], 'id'> }) {
+    async createAuthor(_: undefined, { input }: { input: Omit<typeof authors[0], 'id'> }) {
       if (
-        authors.find(
-          (a) => a.firstName === input.firstName && a.lastName === input.lastName
-        )
+        await author.findOne({ firstName: input.firstName, lastName: input.lastName })
       ) {
         return createError('User must be unique')
       }
-      const newAuthor = { ...input, id: Math.random() }
-      authors.push(newAuthor)
-      return newAuthor
+      const newAuthor = new author({ ...input })
+
+      return newAuthor.save()
     },
   },
   Author: {
