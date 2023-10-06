@@ -12,7 +12,9 @@
   "devDependencies": {
     "@graphql-tools/schema": "^10.0.0",
     "@nuxt/devtools": "latest",
+    "@types/jsonwebtoken": "^9.0.3",
     "graphql": "^16.8.1",
+    "jsonwebtoken": "^9.0.2",
     "mongoose-unique-validator": "^4.0.0",
     "nuxt": "^3.7.4",
     "nuxt-mongoose": "^1.0.2",
