@@ -8,7 +8,9 @@ services:
   # https://github.com/prisma/prisma/tree/main/docker
   # Replica Set (required for Prisma Client)
   mongo:
-    build: .
+    build:
+      dockerfile: Dockerfile
+      context: ./config/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: prisma
@@ -18,3 +20,14 @@ services:
       - 27017:27017
     volumes:
       - ./server/db:/data/db
+  # nuxt:
+  #   user: bitnami
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./config/nuxt
+  #   working_dir: /app
+  #   volumes:
+  #     - ./:/app
+  #   command: sh -c "yarn && yarn dev"
+  #   stdin_open: true
+  #   tty: true
