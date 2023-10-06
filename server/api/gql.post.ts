@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     if (prefix.toLowerCase() === 'bearer') {
       try {
         const { id } = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload
-        const current = await user.findById(id).populate('friends')
+        const current = await User.findById(id).populate('friends')
         if (!current) throw createError({
           statusCode: 400,
           statusMessage: 'Request user is null.'

@@ -56,9 +56,9 @@ const typeDefs = `#graphql
 
 const resolvers = {
   Query: {
-    countAuthors: () => author.count(),
-    allAuthors: () => author.find(),
-    findAuthor: (_: undefined, args: typeof authors[0]) => author.findOne({ firstName: args.firstName }),
+    countAuthors: () => Author.count(),
+    allAuthors: () => Author.find(),
+    findAuthor: (_: undefined, args: typeof authors[0]) => Author.findOne({ firstName: args.firstName }),
     me: (_r: undefined, _a: undefined, ctx: CtxUser) => ctx.currentUser
   },
   Mutation: {
@@ -70,23 +70,23 @@ const resolvers = {
         })
       }
       if (
-        await author.findOne({ firstName: input.firstName, lastName: input.lastName })
+        await Author.findOne({ firstName: input.firstName, lastName: input.lastName })
       ) {
         throw createError({
           statusCode: 401,
           statusMessage: 'Invalid request.'
         })
       }
-      const newAuthor = new author({ ...input })
+      const newAuthor = new Author({ ...input })
 
       return newAuthor.save()
     },
     createUser: async (_: undefined, args: { userName: string }, ctx: CtxUser) => {
-      if (await user.findOne({ userName: args.userName })) {
+      if (await User.findOne({ userName: args.userName })) {
         throw createError('User already exist.')
       }
 
-      const newUser = new user({ userName: args.userName })
+      const newUser = new User({ userName: args.userName })
 
       try {
         const res = await newUser.save()
@@ -95,7 +95,7 @@ const resolvers = {
             ctx.currentUser.friends = ctx.currentUser.friends.concat(res)
             await ctx.currentUser.save()
           } catch (error) {
-            throw new GraphQLError('Error on updating current user.', { originalError: error as Error })
+            throw new GraphQLError('Error on updating current User.', { originalError: error as Error })
           }
         }
         return res || null
@@ -108,10 +108,10 @@ const resolvers = {
       }
     },
     login: async (_: undefined, args: { userName: string, password: string }) => {
-      const logged = await user.findOne({ userName: args.userName })
+      const logged = await User.findOne({ userName: args.userName })
 
       if (!logged || args.password !== 'secret') {
-        throw createError('Invalid credentials form user.')
+        throw createError('Invalid credentials form User.')
       }
 
       const forToken = {
@@ -129,7 +129,7 @@ const resolvers = {
       }
       let friend: any
       try {
-        friend = await user.findById(args.id)
+        friend = await User.findById(args.id)
 
       } catch (error) {
         throw new GraphQLError('Error on finding your friend.', { originalError: error as Error })
