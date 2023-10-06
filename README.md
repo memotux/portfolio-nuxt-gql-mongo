@@ -1,6 +1,15 @@
-# Nuxt 3 Minimal Starter
+# Nuxt 3 GraphQL and MongoDB
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Simple Nuxt 3 as backend form GraphQL and persisting data on MongoDB Docker container.
+
+## Features
+
+- Nuxt 3 as backend for GraphQL queries
+- GraphQL Schema with `@graphql-tools/schema`
+- GraphQL context with JWT for authorization
+- GraphQL Resolvers without authorization rejected
+- MongoDB Replica Docker container
+- Mongoose with `nuxt-mongoose` module
 
 ## Setup
 

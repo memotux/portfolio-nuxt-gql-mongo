@@ -2,6 +2,13 @@
   "name": "nuxt-app",
   "private": true,
   "type": "module",
+  "keywords": [
+    "nuxt",
+    "graphql",
+    "mongoose",
+    "mongodb",
+    "jwt"
+  ],
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
