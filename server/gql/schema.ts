@@ -3,8 +3,15 @@ import { authors, posts } from './data.js'
 import { createError } from 'h3'
 import jwt from 'jsonwebtoken'
 import { GraphQLError } from 'graphql'
+import { PubSub } from 'graphql-subscriptions';
 
 export interface CtxUser { currentUser: any | null }
+
+const pubsub = new PubSub();
+
+const PUBSUB_EVENTS = {
+  CREATE_USER: 'CREATE_USER'
+}
 
 const typeDefs = `#graphql
   type Author {
@@ -52,6 +59,10 @@ const typeDefs = `#graphql
     login(userName: String!, password: String!): Token
     addUserFriend(id: ID!): User
   }
+
+  type Subscription {
+    onCreateUser: User
+  }
 `
 
 const resolvers = {
@@ -98,6 +109,7 @@ const resolvers = {
             throw new GraphQLError('Error on updating current User.', { originalError: error as Error })
           }
         }
+        pubsub.publish(PUBSUB_EVENTS.CREATE_USER, { createUser: res })
         return res || null
       } catch (error) {
         return createError({
@@ -152,6 +164,11 @@ const resolvers = {
   Author: {
     fullName: (root: typeof authors[0]) => `${root.firstName} ${root.lastName}`,
   },
+  Subscription: {
+    onCreateUser: {
+      subscribe: () => pubsub.asyncIterator(PUBSUB_EVENTS.CREATE_USER)
+    }
+  }
 }
 
-export const schema = makeExecutableSchema({ typeDefs, resolvers })
+export default makeExecutableSchema({ typeDefs, resolvers })
