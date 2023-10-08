@@ -4,5 +4,5 @@ export default defineNuxtConfig({
   runtimeConfig: {
     seedDb: false,
   },
-  modules: ["nuxt-mongoose"]
+  modules: ["nuxt-mongoose", "@nuxt/ui"]
 })

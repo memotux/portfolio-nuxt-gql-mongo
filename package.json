@@ -21,6 +21,7 @@
   "devDependencies": {
     "@graphql-tools/schema": "^10.0.0",
     "@nuxt/devtools": "latest",
+    "@nuxt/ui": "^2.9.0",
     "@types/jsonwebtoken": "^9.0.3",
     "graphql": "^16.8.1",
     "graphql-sse": "^2.3.0",
