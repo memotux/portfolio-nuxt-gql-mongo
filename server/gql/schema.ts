@@ -1,9 +1,9 @@
 import { makeExecutableSchema } from '@graphql-tools/schema'
-import { authors, posts } from './data.js'
-import { createError } from 'h3'
 import jwt from 'jsonwebtoken'
+import { createError } from 'h3'
 import { GraphQLError } from 'graphql'
 import { PubSub } from 'graphql-subscriptions';
+import type { authors, posts } from './data.js'
 
 export interface CtxUser { currentUser: any | null }
 
@@ -26,7 +26,7 @@ const typeDefs = `#graphql
   type User {
     _id: ID!
     userName: String!
-    friends: [User!]
+    friends: [User]!
     createdAt: String
     updatedAt: String
   }
@@ -44,6 +44,7 @@ const typeDefs = `#graphql
   type Query {
     countAuthors: Int!
     allAuthors: [Author]!
+    allUsers: [User]!
     findAuthor(firstName: String!): Author
     me: User
   }
@@ -69,8 +70,9 @@ const resolvers = {
   Query: {
     countAuthors: () => Author.count(),
     allAuthors: () => Author.find(),
+    allUsers: () => User.find().populate('friends'),
     findAuthor: (_: undefined, args: typeof authors[0]) => Author.findOne({ firstName: args.firstName }),
-    me: (_r: undefined, _a: undefined, ctx: CtxUser) => ctx.currentUser
+    me: (_r: undefined, _a: undefined, ctx: CtxUser) => ctx?.currentUser || null
   },
   Mutation: {
     async createAuthor(_: undefined, { input }: { input: Omit<typeof authors[0], 'id'> }, ctx: CtxUser) {
@@ -100,8 +102,8 @@ const resolvers = {
       const newUser = new User({ userName: args.userName })
 
       try {
-        const res = await newUser.save()
-        if (ctx.currentUser) {
+        const res = await (await newUser.save()).populate('friends')
+        if (ctx?.currentUser) {
           try {
             ctx.currentUser.friends = ctx.currentUser.friends.concat(res)
             await ctx.currentUser.save()
@@ -109,7 +111,7 @@ const resolvers = {
             throw new GraphQLError('Error on updating current User.', { originalError: error as Error })
           }
         }
-        pubsub.publish(PUBSUB_EVENTS.CREATE_USER, { createUser: res })
+        pubsub.publish(PUBSUB_EVENTS.CREATE_USER, { ...res.toObject() })
         return res || null
       } catch (error) {
         return createError({
@@ -166,6 +168,9 @@ const resolvers = {
   },
   Subscription: {
     onCreateUser: {
+      resolve: (payload: any) => {
+        return payload
+      },
       subscribe: () => pubsub.asyncIterator(PUBSUB_EVENTS.CREATE_USER)
     }
   }
