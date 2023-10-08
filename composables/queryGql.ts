@@ -1,7 +1,16 @@
 import { type RequestParams, createClient, type ExecutionResult } from 'graphql-sse'
 
 const client = createClient({
-  url: 'http://localhost:3000/api/gql'
+  url: 'http://localhost:3000/api/gql',
+  headers() {
+    const token = useCookie('tux-user-token')
+    if (token.value) {
+      return {
+        Authorization: `Bearer ${token.value as string}`
+      }
+    }
+    return {} as Record<string, string>
+  },
 })
 
 export const useQueryGql = async <T = Record<string, unknown>>(params: RequestParams) => {

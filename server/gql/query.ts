@@ -8,3 +8,12 @@ export const AllUsers = /* GraphQL */ `
 }
 ${userWithFriendsFragment}
 `
+
+export const GetMe = /* GraphQL */ `
+{
+  me {
+    ...UserWithFriends
+  }
+}
+${userWithFriendsFragment}
+`

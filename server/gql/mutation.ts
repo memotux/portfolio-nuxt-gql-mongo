@@ -17,3 +17,11 @@ mutation CreateUser($userName: String!) {
 }
 ${userWithFriendsFragment}
 `
+
+export const Login = /* GraphQL */ `
+  mutation Login($userName: String!, $password: String!) {
+    login(userName: $userName, password: $password) {
+      value
+    }
+  }
+`
