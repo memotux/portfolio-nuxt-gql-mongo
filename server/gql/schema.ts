@@ -57,6 +57,7 @@ const typeDefs = `#graphql
   type Mutation {
     createAuthor(input: CreateAuthorInput): Author
     createUser(userName: String!): User
+    deleteUser(id: ID!): User
     login(userName: String!, password: String!): Token
     addUserFriend(id: ID!): User
   }
@@ -160,6 +161,16 @@ const resolvers = {
         return await ctx.currentUser.save()
       } catch (error) {
         throw new GraphQLError('Error adding User Friend', { originalError: error as Error });
+      }
+    },
+    async deleteUser(_: undefined, args: { id: string }) {
+      try {
+        const doc = await User.findByIdAndDelete(args.id)
+        if (doc) {
+          return doc
+        }
+      } catch (error) {
+        throw new GraphQLError('Error deleting user.', { originalError: error as Error })
       }
     }
   },

@@ -3,6 +3,8 @@ useSeoMeta({
   title: 'Tux Users',
 })
 
+const toast = useToast()
+
 interface User {
   _id: string
   userName: string
@@ -64,6 +66,11 @@ const submitUser = async () => {
       },
     })
     data.value.allUsers.push(newUser.value.createUser)
+    toast.add({
+      title: 'New user created.',
+      icon: 'i-heroicons-check-circle',
+      color: 'primary',
+    })
   } catch (error) {
     console.error(error)
     throw createError({
@@ -78,34 +85,42 @@ const submitUser = async () => {
 }
 
 async function deleteUser(id: string) {
-  console.log({ id })
-
-  // try {
-  //   const { data: user } = await useQueryGql<{ deleteUser: User }>({
-  //     query: /* GraphQL */ `
-  //       mutation DeleteUser($id: ID!) {
-  //         deleteUser(id: $id) {
-  //           ...UserWithFriends
-  //         }
-  //       }
-  //       ${userWithFriendsFragment}
-  //     `,
-  //     variables: {
-  //       id,
-  //     },
-  //   })
-  //   const idx = data.value.allUsers.findIndex((u) => u._id === user.value.deleteUser._id)
-  //   if (idx >= 0) {
-  //     data.value.allUsers.splice(idx, 1)
-  //   }
-  // } catch (error) {
-  //   console.error(error)
-  //   throw createError({
-  //     statusMessage: 'Error on deleting user.',
-  //     statusCode: 400,
-  //     data: error,
-  //   })
-  // }
+  try {
+    const { data: user } = await useQueryGql<{ deleteUser: User }>({
+      query: /* GraphQL */ `
+        mutation DeleteUser($id: ID!) {
+          deleteUser(id: $id) {
+            ...UserWithFriends
+          }
+        }
+        ${userWithFriendsFragment}
+      `,
+      variables: {
+        id,
+      },
+    })
+    const idx = data.value.allUsers.findIndex((u) => u._id === user.value.deleteUser._id)
+    if (idx >= 0) {
+      data.value.allUsers.splice(idx, 1)
+      toast.add({
+        title: `User "${user.value.deleteUser.userName}" deleted!`,
+        icon: 'i-heroicons-trash',
+        color: 'red',
+      })
+    } else {
+      throw createError({
+        statusMessage: 'User not exist.',
+        statusCode: 404,
+      })
+    }
+  } catch (error) {
+    console.error(error)
+    throw createError({
+      statusMessage: 'Error on deleting user.',
+      statusCode: 400,
+      data: error,
+    })
+  }
 }
 // onBeforeUnmount(dispose)
 </script>
@@ -184,5 +199,6 @@ async function deleteUser(id: string) {
         </template>
       </UTable>
     </UCard>
+    <UNotifications />
   </UContainer>
 </template>
