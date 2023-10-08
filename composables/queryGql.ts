@@ -4,17 +4,21 @@ const client = createClient({
   url: 'http://localhost:3000/api/gql'
 })
 
-export const useQueryGql = async <T>(params: RequestParams) => {
+export const useQueryGql = async <T = Record<string, unknown>>(params: RequestParams) => {
   // TODO: validate query operation: NOT Subscription
-  const res = client.iterate<T>(params)
+  let res: AsyncIterableIterator<ExecutionResult<T, unknown>> | null = null
   try {
+    res = client.iterate<T>(params)
     const next = await res.next()
 
     await res.return!()
-    return next.value
+    return { data: ref<T>(next.value.data) }
   } catch (err) {
     console.error(err)
-    await res.throw!(err)
+    if (res) {
+      await res.throw!(err)
+    }
+    throw err
   }
 }
 
