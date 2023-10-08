@@ -1,128 +1,44 @@
 <script setup lang="ts">
+import { AllUsersResult, User } from '@/server/gql/types'
+import { AllUsers } from './server/gql/query'
+
 useSeoMeta({
   title: 'Tux Users',
 })
 
 const toast = useToast()
 
-interface User {
-  _id: string
-  userName: string
-  friends: Array<User>
-}
-
-interface AllUsersResult {
-  allUsers: Array<User>
-}
-
-const userWithFriendsFragment = /* GraphQL */ `
-  fragment UserWithFriends on User {
-    _id
-    userName
-    friends {
-      userName
-    }
-  }
-`
 const { data } = await useQueryGql<AllUsersResult>({
-  query: /* GraphQL */ `
-    {
-      allUsers {
-        ...UserWithFriends
-      }
-    }
-    ${userWithFriendsFragment}
-  `,
+  query: AllUsers,
 })
 
-// const { data: subs, dispose } = useSubscriptionGql(/* GraphQL */ `
-//   subscription {
-//     onCreateUser {
-//       ...UserWithFriends
-//     }
-//   }
-//   ${userWithFriendsFragment}
-// `)
-
-// onUpdated(() => console.log({ subs }))
+// const { data, dispose } = useSubscriptionGql(OnCreateUser)
 
 const openAddUserModal = ref(false)
-const addUserState = reactive({
-  userName: '',
-})
-const submitUser = async () => {
-  try {
-    const { data: newUser } = await useQueryGql<{ createUser: User }>({
-      query: /* GraphQL */ `
-        mutation CreateUser($userName: String!) {
-          createUser(userName: $userName) {
-            ...UserWithFriends
-          }
-        }
-        ${userWithFriendsFragment}
-      `,
-      variables: {
-        ...addUserState,
-      },
-    })
-    data.value.allUsers.push(newUser.value.createUser)
+function onSubmitted(newUser: User) {
+  data.value.allUsers.push(newUser)
+  toast.add({
+    title: 'New user created.',
+    icon: 'i-heroicons-check-circle',
+    color: 'primary',
+  })
+}
+function onDeletedUser(user: User) {
+  const idx = data.value.allUsers.findIndex((u) => u._id === user._id)
+  if (idx >= 0) {
+    data.value.allUsers.splice(idx, 1)
     toast.add({
-      title: 'New user created.',
-      icon: 'i-heroicons-check-circle',
-      color: 'primary',
+      title: `User "${user.userName}" deleted!`,
+      icon: 'i-heroicons-trash',
+      color: 'red',
     })
-  } catch (error) {
-    console.error(error)
-    throw createError({
-      statusMessage: 'Error on creating user.',
-      statusCode: 400,
-      data: error,
-    })
-  } finally {
-    addUserState.userName = ''
-    openAddUserModal.value = false
-  }
-}
-
-async function deleteUser(id: string) {
-  try {
-    const { data: user } = await useQueryGql<{ deleteUser: User }>({
-      query: /* GraphQL */ `
-        mutation DeleteUser($id: ID!) {
-          deleteUser(id: $id) {
-            ...UserWithFriends
-          }
-        }
-        ${userWithFriendsFragment}
-      `,
-      variables: {
-        id,
-      },
-    })
-    const idx = data.value.allUsers.findIndex((u) => u._id === user.value.deleteUser._id)
-    if (idx >= 0) {
-      data.value.allUsers.splice(idx, 1)
-      toast.add({
-        title: `User "${user.value.deleteUser.userName}" deleted!`,
-        icon: 'i-heroicons-trash',
-        color: 'red',
-      })
-    } else {
-      throw createError({
-        statusMessage: 'User not exist.',
-        statusCode: 404,
-      })
-    }
-  } catch (error) {
-    console.error(error)
-    throw createError({
-      statusMessage: 'Error on deleting user.',
-      statusCode: 400,
-      data: error,
+  } else {
+    throw showError({
+      statusMessage: 'User not exist.',
+      statusCode: 404,
     })
   }
 }
-// onBeforeUnmount(dispose)
 </script>
 
 <template>
@@ -136,69 +52,15 @@ async function deleteUser(id: string) {
   </nav>
   <UContainer>
     <UModal v-model="openAddUserModal">
-      <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-        <template #header>
-          <h3>Add User:</h3>
-        </template>
-        <UForm
-          :state="addUserState"
-          @submit="submitUser"
-        >
-          <UFormGroup
-            label="User"
-            name="userName"
-          >
-            <UInput v-model="addUserState.userName" />
-          </UFormGroup>
-          <UButton
-            type="submit"
-            class="mt-8"
-          >
-            Add User
-          </UButton>
-        </UForm>
-      </UCard>
+      <FormAddUser
+        @close="openAddUserModal = false"
+        @submitted="onSubmitted"
+      />
     </UModal>
-    <UCard>
-      <template #header>
-        <h2 class="text-3xl">Result</h2>
-      </template>
-      <UTable
-        :rows="data.allUsers"
-        :columns="[
-          { key: '_id', label: 'ID' },
-          { key: 'userName', label: 'User' },
-          { key: 'friends', label: 'Friends' },
-          { key: 'del', label: 'Delete' },
-        ]"
-      >
-        <template #friends-data="{ getRowData }">
-          <template v-if="getRowData().length > 0">
-            <UBadge
-              v-for="friend in getRowData()"
-              :key="friend.userName"
-              class="mx-2"
-              >{{ friend.userName }}</UBadge
-            >
-          </template>
-          <UBadge
-            v-else
-            color="rose"
-            variant="outline"
-            class="mx-2"
-            >None jet!</UBadge
-          >
-        </template>
-        <template #del-data="{ row }">
-          <UButton
-            icon="i-heroicons-trash"
-            color="red"
-            variant="ghost"
-            @click="deleteUser(row._id)"
-          />
-        </template>
-      </UTable>
-    </UCard>
-    <UNotifications />
+    <TableUsers
+      :data="data.allUsers"
+      @deleted="onDeletedUser"
+    />
   </UContainer>
+  <UNotifications />
 </template>
