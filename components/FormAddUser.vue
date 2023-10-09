@@ -7,8 +7,7 @@ const addUserState = reactive({
 })
 
 const emits = defineEmits<{
-  (e: 'success', value: User): void
-  (e: 'close'): void
+  (e: 'close', value: User): void
 }>()
 
 const submitUser = async () => {
@@ -19,17 +18,16 @@ const submitUser = async () => {
         ...addUserState,
       },
     })
-    emits('success', newUser.value.createUser)
+    emits('close', newUser.value.createUser)
   } catch (error) {
     console.error(error)
-    throw createError({
+    throw showError({
       statusMessage: 'Error on creating user.',
       statusCode: 400,
       data: error,
     })
   } finally {
     addUserState.userName = ''
-    emits('close')
   }
 }
 </script>

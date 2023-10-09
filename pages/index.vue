@@ -16,13 +16,16 @@ const { isModalOpen, currentModal } = useModals()
 
 // const { data, dispose } = useSubscriptionGql(OnCreateUser)
 
-function onSubmitted(newUser: User) {
-  data.value.allUsers.push(newUser)
-  toast.add({
-    title: 'New user created.',
-    icon: 'i-heroicons-check-circle',
-    color: 'primary',
-  })
+function onModalClose(value?: User) {
+  if (value) {
+    data.value.allUsers.push(value)
+    toast.add({
+      title: 'New user created.',
+      icon: 'i-heroicons-check-circle',
+      color: 'primary',
+    })
+  }
+  isModalOpen.value = false
 }
 function onDeletedUser(user: User) {
   const idx = data.value.allUsers.findIndex((u) => u._id === user._id)
@@ -46,8 +49,7 @@ function onDeletedUser(user: User) {
   <UModal v-model="isModalOpen">
     <component
       :is="modals[currentModal]"
-      @close="isModalOpen = false"
-      @success="onSubmitted"
+      @close="onModalClose"
     />
   </UModal>
   <TableUsers
