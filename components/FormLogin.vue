@@ -36,31 +36,27 @@ const onLogin = async () => {
 </script>
 
 <template>
-  <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-    <template #header>
-      <h3>Login:</h3>
-    </template>
-    <UForm
-      :state="loginState"
-      @submit="onLogin"
-      class="flex flex-col gap-4"
+  <AppForm
+    title="Login:"
+    submit-label="Login"
+    :state="loginState"
+    @submit="onLogin"
+    form-class="flex flex-col gap-4"
+  >
+    <UFormGroup
+      label="User"
+      name="userName"
     >
-      <UFormGroup
-        label="User"
-        name="userName"
-      >
-        <UInput v-model="loginState.userName" />
-      </UFormGroup>
-      <UFormGroup
-        label="Password"
-        name="password"
-      >
-        <UInput
-          type="password"
-          v-model="loginState.password"
-        />
-      </UFormGroup>
-      <UButton type="submit"> Login </UButton>
-    </UForm>
-  </UCard>
+      <UInput v-model="loginState.userName" />
+    </UFormGroup>
+    <UFormGroup
+      label="Password"
+      name="password"
+    >
+      <UInput
+        type="password"
+        v-model="loginState.password"
+      />
+    </UFormGroup>
+  </AppForm>
 </template>

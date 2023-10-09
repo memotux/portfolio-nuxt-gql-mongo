@@ -33,26 +33,17 @@ const submitUser = async () => {
 </script>
 
 <template>
-  <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
-    <template #header>
-      <h3>Add User:</h3>
-    </template>
-    <UForm
-      :state="addUserState"
-      @submit="submitUser"
+  <AppForm
+    title="Add User:"
+    :state="addUserState"
+    @submit="submitUser"
+    submit-label="Add User"
+  >
+    <UFormGroup
+      label="User"
+      name="userName"
     >
-      <UFormGroup
-        label="User"
-        name="userName"
-      >
-        <UInput v-model="addUserState.userName" />
-      </UFormGroup>
-      <UButton
-        type="submit"
-        class="mt-8"
-      >
-        Add User
-      </UButton>
-    </UForm>
-  </UCard>
+      <UInput v-model="addUserState.userName" />
+    </UFormGroup>
+  </AppForm>
 </template>
