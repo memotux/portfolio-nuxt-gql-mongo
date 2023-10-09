@@ -7,7 +7,7 @@ const addUserState = reactive({
 })
 
 const emits = defineEmits<{
-  (e: 'submitted', value: User): void
+  (e: 'success', value: User): void
   (e: 'close'): void
 }>()
 
@@ -19,7 +19,7 @@ const submitUser = async () => {
         ...addUserState,
       },
     })
-    emits('submitted', newUser.value.createUser)
+    emits('success', newUser.value.createUser)
   } catch (error) {
     console.error(error)
     throw createError({

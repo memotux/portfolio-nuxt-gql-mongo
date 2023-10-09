@@ -7,7 +7,7 @@ const loginState = reactive({
 })
 
 const emits = defineEmits<{
-  (e: 'logged'): void
+  (e: 'close'): void
 }>()
 
 const onLogin = async () => {
@@ -20,7 +20,7 @@ const onLogin = async () => {
     })
 
     useCookie('tux-user-token').value = data.value.login.value
-    emits('logged')
+    emits('close')
   } catch (error) {
     console.error(error)
     throw createError({

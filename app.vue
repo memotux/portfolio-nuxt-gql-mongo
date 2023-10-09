@@ -6,21 +6,29 @@ useSeoMeta({
   title: 'Tux Users',
 })
 
-const toast = useToast()
-
 const { data } = await useQueryGql<AllUsersResult>({
   query: AllUsers,
 })
 
+const toast = useToast()
+const token = useCookie('tux-user-token')
+
+const modals = {
+  FormAddUser: resolveComponent('FormAddUser'),
+  FormLogin: resolveComponent('FormLogin'),
+}
+
 // const { data, dispose } = useSubscriptionGql(OnCreateUser)
 
-const openAddUserModal = ref(false)
-const openLoginModal = ref(false)
-
-const token = useCookie('tux-user-token')
+const isModalOpen = ref(false)
+const currentModal = ref<keyof typeof modals>('FormAddUser')
 
 const isLoggedIn = computed(() => Boolean(token.value))
 
+function setModal(modal: keyof typeof modals) {
+  currentModal.value = modal
+  isModalOpen.value = true
+}
 function onSubmitted(newUser: User) {
   data.value.allUsers.push(newUser)
   toast.add({
@@ -54,26 +62,24 @@ function onDeletedUser(user: User) {
       <UButton
         label="Add User"
         icon="i-heroicons-user-plus"
-        @click="openAddUserModal = true"
+        @click="setModal('FormAddUser')"
       />
       <UButton
         v-if="!isLoggedIn"
         icon="i-heroicons-user-circle"
-        @click="openLoginModal = true"
+        @click="setModal('FormLogin')"
         >Login</UButton
       >
       <MenuUser v-else />
     </div>
   </nav>
   <UContainer>
-    <UModal v-model="openAddUserModal">
-      <FormAddUser
-        @close="openAddUserModal = false"
-        @submitted="onSubmitted"
+    <UModal v-model="isModalOpen">
+      <component
+        :is="modals[currentModal]"
+        @close="isModalOpen = false"
+        @success="onSubmitted"
       />
-    </UModal>
-    <UModal v-model="openLoginModal">
-      <FormLogin @logged="openLoginModal = false" />
     </UModal>
     <TableUsers
       :data="data.allUsers"
