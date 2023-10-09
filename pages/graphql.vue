@@ -16,10 +16,12 @@ useHead({
 onMounted(() => {
   if (window) {
     const root = window.ReactDOM.createRoot(document.getElementById('graphiql'))
-    const fetcher = window.GraphiQL.createFetcher({
-      url: 'http://localhost:3000/api/gql',
-      // headers: { 'X-Example-Header': 'foo' },
-    })
+    // const fetcher = window.GraphiQL.createFetcher({
+    //   url: 'http://localhost:3000/api/gql',
+    //   enableIncrementalDelivery: true,
+    //   // headers: { 'X-Example-Header': 'foo' },
+    // })
+    const fetcher = useQueryGql
     // const explorerPlugin = window.GraphiQLPluginExplorer.explorerPlugin()
     root.render(
       window.React.createElement(window.GraphiQL, {
