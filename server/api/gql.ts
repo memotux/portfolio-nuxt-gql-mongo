@@ -1,5 +1,5 @@
 import { graphql } from 'graphql'
-import schema from '@/server/gql/schema.js'
+import schema from '@/server/gql/schema'
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { createHandler } from 'graphql-sse/lib/use/http'
 

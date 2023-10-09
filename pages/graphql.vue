@@ -21,7 +21,7 @@ onMounted(() => {
     //   enableIncrementalDelivery: true,
     //   // headers: { 'X-Example-Header': 'foo' },
     // })
-    const fetcher = useQueryGql
+    const fetcher = graphiFetcher
     // const explorerPlugin = window.GraphiQLPluginExplorer.explorerPlugin()
     root.render(
       window.React.createElement(window.GraphiQL, {

@@ -13,7 +13,7 @@ const PUBSUB_EVENTS = {
   CREATE_USER: 'CREATE_USER'
 }
 
-const typeDefs = `#graphql
+export const typeDefs = /* GraphQL */ `
   type Author {
     _id: ID!
     id: ID

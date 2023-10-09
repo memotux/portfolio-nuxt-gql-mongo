@@ -44,3 +44,7 @@ export const useSubscriptionGql = (query: RequestParams['query']) => {
 
   return { data, dispose }
 }
+
+export const graphiFetcher = async <T = Record<string, unknown>>(params: RequestParams) => {
+  return client.iterate<T>(params)
+}
