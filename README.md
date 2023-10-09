@@ -1,13 +1,14 @@
 # Nuxt 3 GraphQL and MongoDB
 
-Simple Nuxt 3 as backend form GraphQL and persisting data on MongoDB Docker container.
+Nuxt 3 as backend form GraphQL and persisting data on MongoDB Replica Docker container.
 
 ## Features
 
 - Nuxt 3 as backend for GraphQL queries
 - GraphQL Schema with `@graphql-tools/schema`
+- GraphQL Subscription with `graphql-sse`
 - GraphQL context with JWT for authorization
-- GraphQL Resolvers without authorization rejected
+- GraphQL Resolvers without authorization are rejected
 - MongoDB Replica Docker container
 - Mongoose with `nuxt-mongoose` module
 
