@@ -1,5 +1,5 @@
 {
-  "name": "nuxt-app",
+  "name": "@memotux/profile-nuxt-graphql-mongo",
   "private": true,
   "type": "module",
   "keywords": [
