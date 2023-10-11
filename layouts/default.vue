@@ -6,12 +6,7 @@ useSeoMeta({
 
 <template>
   <AppHeader />
-  <UContainer
-    as="main"
-    :ui="{
-      constrained: $route.path === '/graphql' ? 'max-w-[100dvw] h-[90%]' : 'max-w-7xl',
-    }"
-  >
+  <UContainer as="main">
     <slot />
   </UContainer>
   <UNotifications />

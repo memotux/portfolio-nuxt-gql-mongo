@@ -5,6 +5,7 @@
   "keywords": [
     "nuxt",
     "graphql",
+    "graphiql",
     "mongoose",
     "mongodb",
     "jwt"
