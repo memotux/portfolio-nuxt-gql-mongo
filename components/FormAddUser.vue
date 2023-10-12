@@ -7,18 +7,21 @@ const addUserState = reactive({
 })
 
 const emits = defineEmits<{
-  (e: 'close', value: User): void
+  (e: 'close'): void
 }>()
 
 const submitUser = async () => {
   try {
-    const { data: newUser } = await useQueryGql<{ createUser: User }>({
+    const { data } = await useGqlQuery<{ createUser: User }>({
       query: CreateUser,
       variables: {
         ...addUserState,
       },
     })
-    emits('close', newUser.value.createUser)
+    if (Boolean(data.value.createUser)) {
+      refreshNuxtData('allUsers')
+      emits('close')
+    }
   } catch (error) {
     console.error(error)
     throw showError({

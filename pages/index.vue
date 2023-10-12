@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { AllUsersResult, User } from '@/server/gql/types'
+import type { AllUsersResult } from '@/server/gql/types'
 import { AllUsers } from '@/server/gql/query'
 
-const { data } = await useQueryGql<AllUsersResult>({
+const { data, pending } = await useAsyncGqlQuery<AllUsersResult>('allUsers', {
   query: AllUsers,
 })
 
@@ -11,37 +11,12 @@ const modals = {
   FormLogin: resolveComponent('FormLogin'),
 }
 
-const toast = useToast()
 const { isModalOpen, currentModal } = useModals()
 
-// const { data, dispose } = useSubscriptionGql(OnCreateUser)
+// const { data, dispose } = useGqlSub(OnCreateUser)
 
-function onModalClose(value?: User) {
-  if (value) {
-    data.value.allUsers.push(value)
-    toast.add({
-      title: 'New user created.',
-      icon: 'i-heroicons-check-circle',
-      color: 'primary',
-    })
-  }
+function onModalClose() {
   isModalOpen.value = false
-}
-function onDeletedUser(user: User) {
-  const idx = data.value.allUsers.findIndex((u) => u._id === user._id)
-  if (idx >= 0) {
-    data.value.allUsers.splice(idx, 1)
-    toast.add({
-      title: `User "${user.userName}" deleted!`,
-      icon: 'i-heroicons-trash',
-      color: 'red',
-    })
-  } else {
-    throw showError({
-      statusMessage: 'User not exist.',
-      statusCode: 404,
-    })
-  }
 }
 </script>
 
@@ -53,8 +28,8 @@ function onDeletedUser(user: User) {
     />
   </UModal>
   <TableUsers
-    :data="data.allUsers"
-    @deleted="onDeletedUser"
+    :loading="pending"
+    :data="data?.allUsers"
   />
 </template>
 

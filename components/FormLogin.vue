@@ -12,14 +12,16 @@ const emits = defineEmits<{
 
 const onLogin = async () => {
   try {
-    const { data } = await useQueryGql<{ login: { value: string } }>({
+    const { data } = await useGqlQuery<{ login: { value: string } }>({
       query: Login,
       variables: {
         ...loginState,
       },
     })
 
-    useCookie('tux-user-token').value = data.value.login.value
+    if (data.value.login.value) {
+      useCookie('tux-user-token').value = data.value.login.value
+    }
     emits('close')
   } catch (error) {
     console.error(error)

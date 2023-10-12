@@ -3,22 +3,35 @@ import { DeleteUser } from '~/server/gql/mutation'
 import { User } from '~/server/gql/types'
 
 defineProps<{
-  data: User[]
+  data?: User[]
+  loading?: boolean
 }>()
 
 const emits = defineEmits<{
-  (e: 'deleted', value: User): void
+  (e: 'deleted'): void
 }>()
+
+const toast = useToast()
+const token = useCookie('tux-user-token')
+
+const isLoggedIn = computed(() => Boolean(token.value))
 
 async function deleteUser(id: string) {
   try {
-    const { data: user } = await useQueryGql<{ deleteUser: User }>({
+    const { data } = await useGqlQuery<{ deleteUser: User }>({
       query: DeleteUser,
       variables: {
         id,
       },
     })
-    emits('deleted', user.value.deleteUser)
+    if (data.value.deleteUser) {
+      refreshNuxtData('allUsers')
+      toast.add({
+        title: `User "${data.value.deleteUser.userName}" deleted!`,
+        icon: 'i-heroicons-trash',
+        color: 'red',
+      })
+    }
   } catch (error) {
     console.error(error)
     throw showError({
@@ -36,6 +49,7 @@ async function deleteUser(id: string) {
       <h2 class="text-3xl">Result</h2>
     </template>
     <UTable
+      :loading="loading"
       :rows="data"
       :columns="[
         { key: '_id', label: 'ID' },
@@ -66,6 +80,7 @@ async function deleteUser(id: string) {
           icon="i-heroicons-trash"
           color="red"
           variant="ghost"
+          :disabled="!isLoggedIn"
           @click="deleteUser(row._id)"
         />
       </template>

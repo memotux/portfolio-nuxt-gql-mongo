@@ -13,7 +13,9 @@ const client = createClient({
   },
 })
 
-export const useQueryGql = async <T = Record<string, unknown>>(params: RequestParams) => {
+export const useAsyncGqlQuery = <T>(key: string, params: RequestParams) => useAsyncData<T>(key, async () => (await useGqlQuery(params)).data.value as T)
+
+export const useGqlQuery = async <T = Record<string, unknown>>(params: RequestParams) => {
   // TODO: validate query operation: NOT Subscription
   let res: AsyncIterableIterator<ExecutionResult<T, unknown>> | null = null
   try {
@@ -31,7 +33,7 @@ export const useQueryGql = async <T = Record<string, unknown>>(params: RequestPa
   }
 }
 
-export const useSubscriptionGql = (query: RequestParams['query']) => {
+export const useGqlSub = (query: RequestParams['query']) => {
   // TODO: validate query operation: ONLY Subscriptions
   const data = ref<ExecutionResult<Record<string, unknown>, unknown> | null>(null)
 

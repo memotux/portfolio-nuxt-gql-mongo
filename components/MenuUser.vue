@@ -6,12 +6,14 @@ const token = useCookie('tux-user-token')
 
 const currentUser = ref<User | null>(null)
 
-onMounted(async () => {
+watchEffect(async () => {
   if (token.value) {
-    const { data } = await useQueryGql<{ me: User }>({
+    const { data } = await useGqlQuery<{ me: User }>({
       query: GetMe,
     })
     currentUser.value = data.value.me
+  } else {
+    currentUser.value = null
   }
 })
 
