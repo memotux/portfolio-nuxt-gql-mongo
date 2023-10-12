@@ -1,9 +1,9 @@
 <script setup>
-definePageMeta({
-  layout: 'graphiql',
+useSeoMeta({
+  title: 'GraphiQL | Tux Users',
 })
 onMounted(() => {
-  if (document.getElementById('graphiql')) {
+  if (window.ReactDOM) {
     const root = window.ReactDOM.createRoot(document.getElementById('graphiql'))
     root.render(
       window.React.createElement(window.GraphiQL, {
