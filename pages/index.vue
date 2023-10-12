@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import type { AllUsersResult } from '@/server/gql/types'
+import type { AllUsersResult, OnCreateUserResult } from '@/server/gql/types'
 import { AllUsers } from '@/server/gql/query'
+import { OnCreateUser } from '~/server/gql/subscription'
 
-const { data, pending } = await useAsyncGqlQuery<AllUsersResult>('allUsers', {
+const { data: query, pending } = await useAsyncGqlQuery<AllUsersResult>('allUsers', {
   query: AllUsers,
 })
+
+const { data: sub, dispose } = useGqlSub<OnCreateUserResult>(OnCreateUser)
 
 const modals = {
   FormAddUser: resolveComponent('FormAddUser'),
@@ -13,11 +16,13 @@ const modals = {
 
 const { isModalOpen, currentModal } = useModals()
 
-// const { data, dispose } = useGqlSub(OnCreateUser)
-
 function onModalClose() {
   isModalOpen.value = false
 }
+
+onUnmounted(() => {
+  dispose()
+})
 </script>
 
 <template>
@@ -29,7 +34,7 @@ function onModalClose() {
   </UModal>
   <TableUsers
     :loading="pending"
-    :data="data?.allUsers"
+    :data="sub?.onCreateUser || query?.allUsers"
   />
 </template>
 

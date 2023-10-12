@@ -7,3 +7,7 @@ export interface User {
 export interface AllUsersResult {
   allUsers: Array<User>
 }
+
+export interface OnCreateUserResult {
+  onCreateUser: Array<User> | null
+}

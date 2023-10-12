@@ -19,7 +19,7 @@ const submitUser = async () => {
       },
     })
     if (Boolean(data.value.createUser)) {
-      refreshNuxtData('allUsers')
+      // refreshNuxtData('allUsers')
       emits('close')
     }
   } catch (error) {

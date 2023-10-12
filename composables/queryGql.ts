@@ -1,4 +1,5 @@
 import { type RequestParams, createClient, type ExecutionResult } from 'graphql-sse'
+import type { UnwrapRef } from 'vue'
 
 const client = createClient({
   url: 'http://localhost:3000/api/gql',
@@ -33,13 +34,22 @@ export const useGqlQuery = async <T = Record<string, unknown>>(params: RequestPa
   }
 }
 
-export const useGqlSub = (query: RequestParams['query']) => {
+export const useGqlSub = <T>(query: RequestParams['query']) => {
   // TODO: validate query operation: ONLY Subscriptions
-  const data = ref<ExecutionResult<Record<string, unknown>, unknown> | null>(null)
+  const data = ref<T | null>(null)
 
-  const dispose = client.subscribe({ query }, {
-    next: (d: any) => data.value = d,
-    error: (e: any) => console.error(e),
+  const dispose = client.subscribe<T>({ query }, {
+    next: (d) => {
+      if (d.data) {
+        data.value = d.data as UnwrapRef<T>
+      }
+
+      if (d.errors) {
+        throw d.errors
+      }
+
+    },
+    error: (e) => console.error(e),
     complete: () => console.log('subscription completed')
 
   })

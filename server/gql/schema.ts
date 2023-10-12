@@ -64,7 +64,7 @@ export const typeDefs: TypeSource = /* GraphQL */ `
   }
 
   type Subscription {
-    onCreateUser: User
+    onCreateUser: [User]
   }
 `
 
@@ -164,12 +164,17 @@ const resolvers: IResolvers = {
         throw new GraphQLError('Error adding User Friend', { originalError: error as Error });
       }
     },
-    async deleteUser(_: undefined, args: { id: string }) {
+    async deleteUser(_: undefined, args: { id: string }, ctx: { currentUser: CtxUser }) {
+      if (!ctx.currentUser) {
+        throw new GraphQLError('Not Authorized.')
+      }
       try {
         const doc = await User.findByIdAndDelete(args.id)
         if (doc) {
           return doc
         }
+        throw new GraphQLError('User can not be deleted')
+
       } catch (error) {
         throw new GraphQLError('Error deleting user.', { originalError: error as Error })
       }
@@ -180,8 +185,8 @@ const resolvers: IResolvers = {
   },
   Subscription: {
     onCreateUser: {
-      resolve: (payload: any) => {
-        return payload
+      resolve: () => {
+        return User.find().populate('friends')
       },
       subscribe: () => pubsub.asyncIterator(PUBSUB_EVENTS.CREATE_USER)
     }
