@@ -6,7 +6,6 @@ import { createHandler } from 'graphql-sse/lib/use/http'
 const handler = createHandler({
   schema,
   context: async (req) => {
-    const contextValue: { currentUser: any | null } = { currentUser: null }
     const auth = req.headers.get('authorization')
     if (auth) {
       const [prefix, token] = auth.split(' ')
@@ -18,8 +17,7 @@ const handler = createHandler({
             statusCode: 400,
             statusMessage: 'Request user is null.'
           })
-          contextValue.currentUser = current
-          return contextValue
+          return { currentUser: current }
         } catch (error) {
           throw createError({
             statusCode: 400,

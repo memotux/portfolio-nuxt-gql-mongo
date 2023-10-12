@@ -4,6 +4,7 @@ import { createError } from 'h3'
 import { GraphQLError } from 'graphql'
 import { PubSub } from 'graphql-subscriptions';
 import type { authors, posts } from './data.js'
+import type { IResolvers, TypeSource } from '@graphql-tools/utils'
 
 export interface CtxUser { currentUser: any | null }
 
@@ -13,7 +14,7 @@ const PUBSUB_EVENTS = {
   CREATE_USER: 'CREATE_USER'
 }
 
-export const typeDefs = /* GraphQL */ `
+export const typeDefs: TypeSource = /* GraphQL */ `
   type Author {
     _id: ID!
     id: ID
@@ -67,13 +68,13 @@ export const typeDefs = /* GraphQL */ `
   }
 `
 
-const resolvers = {
+const resolvers: IResolvers = {
   Query: {
     countAuthors: () => Author.count(),
     allAuthors: () => Author.find(),
     allUsers: () => User.find().populate('friends'),
     findAuthor: (_: undefined, args: typeof authors[0]) => Author.findOne({ firstName: args.firstName }),
-    me: (_r: undefined, _a: undefined, ctx: CtxUser) => ctx?.currentUser || null
+    me: (_r, _a, ctx: CtxUser) => ctx?.currentUser || null
   },
   Mutation: {
     async createAuthor(_: undefined, { input }: { input: Omit<typeof authors[0], 'id'> }, ctx: CtxUser) {
@@ -95,7 +96,7 @@ const resolvers = {
 
       return newAuthor.save()
     },
-    createUser: async (_: undefined, args: { userName: string }, ctx: CtxUser) => {
+    createUser: async (_r, args, ctx: CtxUser) => {
       if (await User.findOne({ userName: args.userName })) {
         throw createError('User already exist.')
       }
