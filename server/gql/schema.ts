@@ -64,7 +64,7 @@ export const typeDefs: TypeSource = /* GraphQL */ `
   }
 
   type Subscription {
-    onCreateUser: [User]
+    onCreateUser(all: Boolean): [User]
   }
 `
 
@@ -185,8 +185,12 @@ const resolvers: IResolvers = {
   },
   Subscription: {
     onCreateUser: {
-      resolve: () => {
-        return User.find().populate('friends')
+      resolve: (payload, args: { all: boolean }) => {
+        if (args.all) {
+          return User.find().populate('friends')
+        } else {
+          return [payload]
+        }
       },
       subscribe: () => pubsub.asyncIterator(PUBSUB_EVENTS.CREATE_USER)
     }

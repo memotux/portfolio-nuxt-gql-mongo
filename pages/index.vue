@@ -7,7 +7,30 @@ const { data: query, pending } = await useAsyncGqlQuery<AllUsersResult>('allUser
   query: AllUsers,
 })
 
-const { data: sub, dispose } = useGqlSub<OnCreateUserResult>(OnCreateUser)
+const { dispose } = useGqlSub<OnCreateUserResult>(
+  { query: OnCreateUser, variables: { all: true } },
+  {
+    next(value) {
+      if (query.value && value.data?.onCreateUser) {
+        if (value.data.onCreateUser.length > 1) {
+          query.value.allUsers = value.data.onCreateUser
+        } else if (value.data.onCreateUser.length === 1) {
+          query.value.allUsers.push(...value.data.onCreateUser)
+        }
+      }
+    },
+    error(error) {
+      throw createError({
+        statusMessage: 'Error on subscribe.',
+        statusCode: 400,
+        data: error as Error,
+      })
+    },
+    complete() {
+      console.log('subscribe closed')
+    },
+  }
+)
 
 const modals = {
   FormAddUser: resolveComponent('FormAddUser'),
@@ -34,7 +57,7 @@ onUnmounted(() => {
   </UModal>
   <TableUsers
     :loading="pending"
-    :data="sub?.onCreateUser || query?.allUsers"
+    :data="query?.allUsers"
   />
 </template>
 

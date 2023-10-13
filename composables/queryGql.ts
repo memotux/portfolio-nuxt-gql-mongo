@@ -1,4 +1,4 @@
-import { type RequestParams, createClient, type ExecutionResult } from 'graphql-sse'
+import { type RequestParams, createClient, type ExecutionResult, Sink } from 'graphql-sse'
 import type { UnwrapRef } from 'vue'
 
 const client = createClient({
@@ -14,17 +14,17 @@ const client = createClient({
   },
 })
 
-export const useAsyncGqlQuery = <T>(key: string, params: RequestParams) => useAsyncData<T>(key, async () => (await useGqlQuery(params)).data.value as T)
+export const useAsyncGqlQuery = <R>(key: string, params: RequestParams) => useAsyncData<R>(key, async () => (await useGqlQuery(params)).data.value as R)
 
-export const useGqlQuery = async <T = Record<string, unknown>>(params: RequestParams) => {
+export const useGqlQuery = async <R = Record<string, unknown>>(params: RequestParams) => {
   // TODO: validate query operation: NOT Subscription
-  let res: AsyncIterableIterator<ExecutionResult<T, unknown>> | null = null
+  let res: AsyncIterableIterator<ExecutionResult<R, unknown>> | null = null
   try {
-    res = client.iterate<T>(params)
+    res = client.iterate<R>(params)
     const next = await res.next()
 
     await res.return!()
-    return { data: ref<T>(next.value.data) }
+    return { data: ref<R>(next.value.data) }
   } catch (err) {
     console.error(err)
     if (res) {
@@ -34,14 +34,18 @@ export const useGqlQuery = async <T = Record<string, unknown>>(params: RequestPa
   }
 }
 
-export const useGqlSub = <T>(query: RequestParams['query']) => {
+export const useGqlSub = <R, E = unknown>(params: RequestParams, sink?: Sink<ExecutionResult<R, E>>) => {
   // TODO: validate query operation: ONLY Subscriptions
-  const data = ref<T | null>(null)
 
-  const dispose = client.subscribe<T>({ query }, {
+  if (sink) {
+    const dispose = client.subscribe<R>(params, sink)
+    return { dispose }
+  }
+  const data = ref<R | null>(null)
+  const dispose = client.subscribe<R>(params, {
     next: (d) => {
       if (d.data) {
-        data.value = d.data as UnwrapRef<T>
+        data.value = d.data as UnwrapRef<R>
       }
 
       if (d.errors) {
@@ -51,12 +55,11 @@ export const useGqlSub = <T>(query: RequestParams['query']) => {
     },
     error: (e) => console.error(e),
     complete: () => console.log('subscription completed')
-
   })
 
   return { data, dispose }
 }
 
-export const graphiFetcher = async <T = Record<string, unknown>>(params: RequestParams) => {
-  return client.iterate<T>(params)
+export const graphiFetcher = async <R>(params: RequestParams) => {
+  return client.iterate<R>(params)
 }
